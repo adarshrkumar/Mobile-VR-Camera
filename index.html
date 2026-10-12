@@ -1,1 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Mobile VR Camera</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Stereo view: the rear camera rendered once per eye -->
+  <canvas id="vr-canvas"></canvas>
+  <video id="camera" playsinline muted autoplay></video>
+  <div id="divider" class="divider"></div>
 
+  <!-- Start screen -->
+  <section id="start-screen" class="screen">
+    <div class="card">
+      <h1>Mobile VR Camera</h1>
+      <p>See the world through your phone's rear camera in a VR headset, Cardboard style.</p>
+      <ol>
+        <li>Tap <strong>Start VR</strong> and allow camera access.</li>
+        <li>Turn your phone sideways (landscape).</li>
+        <li>Put it in your Cardboard / VR viewer.</li>
+      </ol>
+      <button id="start-btn" class="primary">Start VR</button>
+      <p id="error" class="error" hidden></p>
+    </div>
+  </section>
+
+  <!-- Rotate hint (portrait only, while running) -->
+  <section id="rotate-hint" class="screen" hidden>
+    <div class="rotate-icon" aria-hidden="true">&#x21bb;</div>
+    <p>Rotate your phone to landscape</p>
+  </section>
+
+  <!-- In-VR controls; tap the screen to show them -->
+  <div id="controls" class="controls">
+    <button id="settings-btn" class="icon-btn" aria-label="Settings">&#9881;</button>
+    <button id="fullscreen-btn" class="icon-btn" aria-label="Toggle fullscreen">&#x26F6;</button>
+    <button id="exit-btn" class="icon-btn" aria-label="Exit VR">&#x2715;</button>
+  </div>
+
+  <div id="settings" class="settings" hidden>
+    <h2>Settings</h2>
+    <label class="row">
+      <span>Lens distortion</span>
+      <input type="checkbox" id="opt-distortion">
+    </label>
+    <label class="row">
+      <span>Center divider</span>
+      <input type="checkbox" id="opt-divider">
+    </label>
+    <label class="col">
+      <span>Zoom <output id="out-zoom"></output></span>
+      <input type="range" id="opt-zoom" min="1" max="3" step="0.05">
+    </label>
+    <label class="col">
+      <span>Lens spacing <output id="out-spacing"></output></span>
+      <input type="range" id="opt-spacing" min="-0.15" max="0.15" step="0.005">
+    </label>
+    <label class="col">
+      <span>Distortion strength <output id="out-strength"></output></span>
+      <input type="range" id="opt-strength" min="0" max="2" step="0.05">
+    </label>
+    <div class="settings-actions">
+      <button id="reset-btn">Reset</button>
+      <button id="close-settings-btn" class="primary">Done</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,1 +1,222 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#vr-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* The raw camera feed is only a texture source for the canvas */
+#camera {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.divider {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  display: none;
+}
+
+body.running .divider.visible {
+  display: block;
+}
+
+/* Full-screen overlays */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #000;
+  z-index: 20;
+  text-align: center;
+}
+
+.screen[hidden] {
+  display: none;
+}
+
+.card {
+  max-width: 420px;
+  width: 100%;
+}
+
+.card h1 {
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+}
+
+.card p {
+  color: #bbb;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.card ol {
+  text-align: left;
+  color: #ddd;
+  line-height: 1.6;
+  margin: 0 auto 24px;
+  padding-left: 20px;
+  max-width: 320px;
+}
+
+button {
+  font: inherit;
+  color: #fff;
+  background: #333;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #1a73e8;
+}
+
+#start-btn {
+  font-size: 1.2rem;
+  padding: 14px 36px;
+  border-radius: 999px;
+}
+
+.error {
+  margin-top: 16px;
+  color: #ff8a80 !important;
+}
+
+.rotate-icon {
+  font-size: 4rem;
+  margin-bottom: 12px;
+  animation: spin 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0%, 30% { transform: rotate(0deg); }
+  70%, 100% { transform: rotate(90deg); }
+}
+
+/* Controls overlay */
+.controls {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+body.running.show-controls .controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Settings panel */
+.settings {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(360px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow-y: auto;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 16px 18px;
+  z-index: 15;
+}
+
+.settings[hidden] {
+  display: none;
+}
+
+.settings h2 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.settings label {
+  display: flex;
+  margin: 10px 0;
+  font-size: 0.95rem;
+}
+
+.settings label.row {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings label.col {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings output {
+  color: #8ab4f8;
+  margin-left: 6px;
+}
+
+.settings input[type="range"] {
+  width: 100%;
+}
+
+.settings input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
