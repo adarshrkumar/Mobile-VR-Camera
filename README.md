@@ -14,6 +14,7 @@ No install, build step or dependencies: it's plain HTML, CSS and JavaScript.
   - Lens distortion on/off
   - Distortion strength
   - Zoom (1×–3×)
+  - Autofocus on/off and manual focus, on cameras that support it
   - Lens spacing, to match the distance between your viewer's lenses
   - Center divider line on/off
 

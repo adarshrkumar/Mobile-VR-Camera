@@ -58,6 +58,15 @@
       <span>Zoom <output id="out-zoom"></output></span>
       <input type="range" id="opt-zoom" min="1" max="3" step="0.05">
     </label>
+    <label class="row">
+      <span>Autofocus</span>
+      <input type="checkbox" id="opt-autofocus">
+    </label>
+    <label class="col">
+      <span>Focus <output id="out-focus"></output></span>
+      <input type="range" id="opt-focus" min="0" max="1" step="0.01">
+      <small id="focus-note" class="note" hidden>Manual focus isn't supported by this camera or browser.</small>
+    </label>
     <label class="col">
       <span>Lens spacing <output id="out-spacing"></output></span>
       <input type="range" id="opt-spacing" min="-0.15" max="0.15" step="0.005">

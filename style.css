@@ -209,6 +209,15 @@ body.running.show-controls .controls {
   width: 100%;
 }
 
+.settings .note {
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.settings .note[hidden] {
+  display: none;
+}
+
 .settings input[type="checkbox"] {
   width: 20px;
   height: 20px;

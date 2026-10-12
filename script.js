@@ -11,6 +11,8 @@
     distortion: true, // Cardboard-style barrel distortion to counter the lenses
     divider: true,    // thin line between the two eyes
     zoom: 1,          // digital zoom on the camera feed
+    autofocus: true,  // let the camera focus continuously
+    focus: 0.5,       // manual focus, 0 = nearest .. 1 = farthest the camera allows
     spacing: 0,       // shifts each eye's lens center inward (+) or outward (-)
     strength: 1,      // multiplier for the distortion coefficients
   };
@@ -57,12 +59,15 @@
     distortion: $('opt-distortion'),
     divider: $('opt-divider'),
     zoom: $('opt-zoom'),
+    autofocus: $('opt-autofocus'),
+    focus: $('opt-focus'),
     spacing: $('opt-spacing'),
     strength: $('opt-strength'),
   };
 
   const outputs = {
     zoom: $('out-zoom'),
+    focus: $('out-focus'),
     spacing: $('out-spacing'),
     strength: $('out-strength'),
   };
@@ -257,7 +262,59 @@
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Focus (Image Capture constraints; supported on e.g. Android Chrome)
+  // ---------------------------------------------------------------------------
+
+  let focusRange = null; // { min, max, step } in meters, or null if unsupported
+  let focusBusy = false;
+  let focusPending = false;
+
+  function detectFocusSupport() {
+    focusRange = null;
+    const track = stream && stream.getVideoTracks()[0];
+    if (!track || !track.getCapabilities) return;
+    const caps = track.getCapabilities();
+    const modes = caps.focusMode || [];
+    if (caps.focusDistance && modes.includes('manual')) {
+      const { min, max, step } = caps.focusDistance;
+      if (max > min) focusRange = { min, max, step: step || 0 };
+    }
+  }
+
+  function focusDistance() {
+    const { min, max, step } = focusRange;
+    let d = min + settings.focus * (max - min);
+    if (step) d = min + Math.round((d - min) / step) * step;
+    return Math.min(max, Math.max(min, d));
+  }
+
+  // Coalesces rapid slider changes so only one applyConstraints runs at a time
+  async function applyFocus() {
+    const track = stream && stream.getVideoTracks()[0];
+    if (!track || !focusRange) return;
+    if (focusBusy) {
+      focusPending = true;
+      return;
+    }
+    focusBusy = true;
+    try {
+      const constraint = settings.autofocus
+        ? { focusMode: 'continuous' }
+        : { focusMode: 'manual', focusDistance: focusDistance() };
+      await track.applyConstraints({ advanced: [constraint] });
+    } catch (e) {
+      // Camera rejected the focus setting — leave it as it was
+    }
+    focusBusy = false;
+    if (focusPending) {
+      focusPending = false;
+      applyFocus();
+    }
+  }
+
   function stopCamera() {
+    focusRange = null;
     if (stream) {
       stream.getTracks().forEach((t) => t.stop());
       stream = null;
@@ -337,6 +394,8 @@
       stream = await openRearCamera();
       video.srcObject = stream;
       await video.play();
+      detectFocusSupport();
+      applyFocus();
     } catch (e) {
       stopCamera();
       exitFullscreen();
@@ -347,6 +406,7 @@
     }
 
     running = true;
+    syncSettingsUI();
     document.body.classList.add('running');
     startScreen.hidden = true;
     startBtn.disabled = false;
@@ -421,9 +481,17 @@
     inputs.spacing.value = settings.spacing;
     inputs.strength.value = settings.strength;
     inputs.strength.disabled = !settings.distortion;
+    inputs.autofocus.checked = settings.autofocus;
+    inputs.focus.value = settings.focus;
+    inputs.autofocus.disabled = !focusRange;
+    inputs.focus.disabled = !focusRange || settings.autofocus;
+    $('focus-note').hidden = !running || !!focusRange;
 
     outputs.zoom.textContent = `${Number(settings.zoom).toFixed(2)}×`;
     outputs.spacing.textContent = `${settings.spacing > 0 ? '+' : ''}${Math.round(settings.spacing * 200)}%`;
+    outputs.focus.textContent = !focusRange || settings.autofocus
+      ? 'Auto'
+      : `${focusDistance().toFixed(2)} m`;
     outputs.strength.textContent = `${Math.round(settings.strength * 100)}%`;
 
     divider.classList.toggle('visible', settings.divider);
@@ -447,11 +515,24 @@
         saveSettings();
       });
     }
+    inputs.autofocus.addEventListener('change', () => {
+      settings.autofocus = inputs.autofocus.checked;
+      syncSettingsUI();
+      saveSettings();
+      applyFocus();
+    });
+    inputs.focus.addEventListener('input', () => {
+      settings.focus = parseFloat(inputs.focus.value);
+      syncSettingsUI();
+      saveSettings();
+      applyFocus();
+    });
 
     $('reset-btn').addEventListener('click', () => {
       settings = { ...DEFAULTS };
       syncSettingsUI();
       saveSettings();
+      applyFocus();
     });
     $('close-settings-btn').addEventListener('click', () => {
       settingsPanel.hidden = true;
